@@ -237,7 +237,7 @@ if __name__ == "__main__":
     # )
 
     config = atari_dqn_config(
-        "BreakoutNoFrameskip-v0",
+        "BreakoutNoFrameskip-v4",
         exp_name="breakout",
         use_double_q=True,
         # hidden_size=64,
