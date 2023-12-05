@@ -116,6 +116,7 @@ def run_training(config: dict, logger: Logger, data_path: str):
         # Main DQN training loop
         if step >= config["learning_starts"]:
             # TODO(student): Sample config["batch_size"] samples from the replay buffer
+            # config["batch_size"] is 128 for basic envs and 32 for atari envs
             batch = replay_buffer.sample(config["batch_size"])
 
             # Convert to PyTorch tensors
@@ -174,6 +175,7 @@ def run_training(config: dict, logger: Logger, data_path: str):
                 print(np.std(ep_lens), "eval/ep_len_std", step)
                 print(np.max(ep_lens), "eval/ep_len_max", step)
                 print(np.min(ep_lens), "eval/ep_len_min", step)
+                print(len(replay_buffer), "replay_buffer_size", step)
 
             # if args.num_render_trajectories > 0:
             #     video_trajectories = utils.sample_n_trajectories(
@@ -221,20 +223,20 @@ if __name__ == "__main__":
     torch.manual_seed(RANDOM_SEED)
     ptu.init_gpu(use_gpu=USE_GPU, gpu_id=GPU_ID)
 
-    # config = basic_dqn_config(
-    #     "LunarLander-v2",
-    #     exp_name="lunarlander",
-    #     # hidden_size=64,
-    #     # num_layers=2,
-    #     # learning_rate=1e-3,
-    #     # total_steps=300000 * 2,
-    #     # discount=0.99,
-    #     # target_update_period=1000,
-    #     # clip_grad_norm=None,
-    #     # use_double_q=False,
-    #     # learning_starts=20000,
-    #     # batch_size=128,
-    # )
+    """config = basic_dqn_config(
+        "LunarLander-v2",
+        exp_name="lunarlander",
+        # hidden_size=64,
+        # num_layers=2,
+        # learning_rate=1e-3,
+        # total_steps=300000 * 2,
+        # discount=0.99,
+        # target_update_period=1000,
+        # clip_grad_norm=None,
+        # use_double_q=False,
+        # learning_starts=20000,
+        # batch_size=128,
+    )"""
 
     config = atari_dqn_config(
         "BreakoutNoFrameskip-v4",

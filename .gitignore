@@ -1,5 +1,7 @@
 data/
 data_final/
+data_gpu/
+video.mp4
 .DS_Store
 
 
