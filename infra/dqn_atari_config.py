@@ -5,10 +5,10 @@ import gym
 import numpy as np
 import torch
 import torch.nn as nn
-from atari_wrappers import wrap_deepmind
 from gym.wrappers.frame_stack import FrameStack
 
 from infra import pytorch_util as ptu
+from infra.atari_wrappers import wrap_deepmind
 
 from .schedule import ConstantSchedule, LinearSchedule, PiecewiseSchedule
 

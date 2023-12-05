@@ -237,8 +237,8 @@ if __name__ == "__main__":
     # )
 
     config = atari_dqn_config(
-        "MsPacmanNoFrameskip-v0",
-        exp_name="mspacman",
+        "BreakoutNoFrameskip-v0",
+        exp_name="breakout",
         use_double_q=True,
         # hidden_size=64,
         # num_layers=2,
