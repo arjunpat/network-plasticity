@@ -62,11 +62,13 @@ def main():
 
     agent = torch.load(
         # "./data_gpu/breakout_BreakoutNoFrameskip-v4_05-12-2023_02-50-09_clip10.0/model_chkpts/model_980000.pt"
-        "data/breakout_BreakoutNoFrameskip-v4_04-12-2023_23-15-58_clip10.0/model_chkpts/model_30000.pt"
-        # "data_gpu/breakout_BreakoutNoFrameskip-v4_05-12-2023_02-50-09_clip10.0/model_chkpts/model_950000.pt"
+        # "data/breakout_BreakoutNoFrameskip-v4_04-12-2023_23-15-58_clip10.0/model_chkpts/model_30000.pt"
+        #"data_gpu/breakout_BreakoutNoFrameskip-v4_05-12-2023_02-50-09_clip10.0/model_chkpts/model_990000.pt",
+        "data_gpu/breakout_BreakoutNoFrameskip-v4_07-12-2023_02-43-37_clip10.0/model_chkpts/model_1900000.pt",
+        map_location="cpu",
     )
 
-    NUM_RENDER_TRAJS = 2
+    NUM_RENDER_TRAJS = 5
 
     video_trajectories = utils.sample_n_trajectories(
         render_env,
@@ -76,7 +78,7 @@ def main():
         render=True,
     )
 
-    videos = create_video(video_trajectories)
+    videos = create_video(video_trajectories, max_videos_to_save=NUM_RENDER_TRAJS)
     save_video(videos, "video.mp4")
 
 
