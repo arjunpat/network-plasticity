@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import time
 
 import gym
 import numpy as np
@@ -115,6 +116,16 @@ def run_training(config: dict, logger: Logger, data_path: str):
 
         # Main DQN training loop
         if step >= config["learning_starts"]:
+            if config["swap_critic"] and step % config["swap_critic_period"] == 0:
+                old_time = time.time()
+                agent.swap_critic(
+                    config,
+                    replay_buffer,
+                    config["batch_size"],
+                    config["swap_critic_init_epochs"],
+                )
+                print(f"Time taken to swap critic: {time.time() - old_time} seconds")
+
             # TODO(student): Sample config["batch_size"] samples from the replay buffer
             # config["batch_size"] is 128 for basic envs and 32 for atari envs
             batch = replay_buffer.sample(config["batch_size"])
@@ -223,9 +234,12 @@ if __name__ == "__main__":
     torch.manual_seed(RANDOM_SEED)
     ptu.init_gpu(use_gpu=USE_GPU, gpu_id=GPU_ID)
 
-    """config = basic_dqn_config(
-        "LunarLander-v2",
-        exp_name="lunarlander",
+    config = basic_dqn_config(
+        "CartPole-v0",
+        exp_name="cartpole_swap_critic_epochs_next_obs",
+        swap_critic=True,
+        swap_critic_period=100000,
+        swap_critic_init_epochs=5,
         # hidden_size=64,
         # num_layers=2,
         # learning_rate=1e-3,
@@ -236,8 +250,8 @@ if __name__ == "__main__":
         # use_double_q=False,
         # learning_starts=20000,
         # batch_size=128,
-    )"""
-
+    )
+    """"
     config = atari_dqn_config(
         "BreakoutNoFrameskip-v4",
         exp_name="breakout",
@@ -253,6 +267,7 @@ if __name__ == "__main__":
         # learning_starts=20000,
         # batch_size=128,
     )
+    """
 
     data_path = get_logdir(config, final=args.final)
 

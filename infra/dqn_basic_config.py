@@ -26,6 +26,9 @@ def basic_dqn_config(
     learning_starts: int = 20000,
     batch_size: int = 128,
     weight_decay: bool = False,
+    swap_critic: bool = False,
+    swap_critic_period: int = 30000,
+    swap_critic_init_epochs: int = 3,
     **kwargs,
 ):
     def make_critic(observation_shape: Tuple[int, ...], num_actions: int) -> nn.Module:
@@ -79,5 +82,8 @@ def basic_dqn_config(
         "batch_size": batch_size,
         "learning_starts": learning_starts,
         "weight_decay": weight_decay,
+        "swap_critic": swap_critic,
+        "swap_critic_period": swap_critic_period,
+        "swap_critic_init_epochs": swap_critic_init_epochs,
         **kwargs,
     }

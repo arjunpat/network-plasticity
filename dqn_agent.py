@@ -85,6 +85,7 @@ class DQNAgent(nn.Module):
                 next_q_values, _ = next_qa_values.max(dim=-1)
             else:
                 # Double-Q
+                assert False, "Double-Q should not be running"
                 doubleq_next_qa_values: torch.Tensor = self.critic(next_obs)
                 doubleq_next_action = doubleq_next_qa_values.argmax(dim=-1)
                 next_q_values = torch.gather(
@@ -136,6 +137,44 @@ class DQNAgent(nn.Module):
 
     def update_target_critic(self):
         self.target_critic.load_state_dict(self.critic.state_dict())
+
+    def swap_critic(self, config, replay_buffer, batch_size: int, epochs: int):
+        assert config["swap_critic"]
+        assert batch_size % 2 == 0, "batch_size must be even"
+
+        new_critic = config["agent_kwargs"]["make_critic"](
+            self.observation_shape, self.num_actions
+        )
+        new_optim = config["agent_kwargs"]["make_optimizer"](new_critic.parameters())
+        new_lr = config["agent_kwargs"]["make_lr_schedule"](new_optim)
+
+        # number of targets to train on (obs and next_obs)
+        total_target_count = len(replay_buffer) * epochs * 2
+
+        for _ in range(total_target_count // batch_size):
+            batch = replay_buffer.sample(batch_size // 2)
+
+            obs = ptu.from_numpy(batch["observations"])
+            next_obs = ptu.from_numpy(batch["next_observations"])
+            inputs = torch.cat([obs, next_obs], dim=0)
+            assert inputs.shape == (batch_size, *self.observation_shape)
+
+            with torch.no_grad():
+                targets = self.critic(inputs)
+            output = new_critic(inputs)
+
+            loss = self.critic_loss(output, targets)
+
+            new_optim.zero_grad()
+            loss.backward()
+            new_optim.step()
+            new_lr.step()
+
+        # update the critic
+        self.critic = new_critic
+        self.critic_optimizer = new_optim
+        self.lr_scheduler = new_lr
+        self.update_target_critic()
 
     def update(
         self,
