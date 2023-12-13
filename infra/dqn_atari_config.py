@@ -38,6 +38,11 @@ def atari_dqn_config(
     swap_critic: bool = False,
     swap_critic_period: int = 100000,
     swap_critic_init_epochs: int = 3,
+
+    # For the critic averaging experiment
+    swap_critic_averaging: bool = False,
+    swap_critic_averaging_period: int = 10000,
+
     **kwargs,
 ):
     def make_critic(observation_shape: Tuple[int, ...], num_actions: int) -> nn.Module:
@@ -88,7 +93,7 @@ def atari_dqn_config(
         [
             (0, 1.0),
             (20000, 1),
-            (total_steps / 2, 0.01),
+            (total_steps / 2, 0.05),
         ],
         outside_value=0.01,
     )
@@ -97,6 +102,10 @@ def atari_dqn_config(
         return wrap_deepmind(
             gym.make(env_name, render_mode="rgb_array" if render else None)
         )
+
+    def get_swap_critic_avg_weights(n: int):
+        # return np.ones(n) / n
+        return np.exp(-np.arange(n) / n) / np.exp(-np.arange(n) / n).sum()
 
     log_string = f"{exp_name}_{env_name}_" + time.strftime("%d-%m-%Y_%H-%M-%S")
 
@@ -116,6 +125,7 @@ def atari_dqn_config(
         "log_name": log_string,
         "exploration_schedule": exploration_schedule,
         "make_env": make_env,
+        "get_swap_critic_avg_weights": get_swap_critic_avg_weights,
         "total_steps": total_steps,
         "batch_size": batch_size,
         "learning_starts": learning_starts,
@@ -123,5 +133,7 @@ def atari_dqn_config(
         "swap_critic": swap_critic,
         "swap_critic_period": swap_critic_period,
         "swap_critic_init_epochs": swap_critic_init_epochs,
+        "swap_critic_averaging": swap_critic_averaging,
+        "swap_critic_averaging_period": swap_critic_averaging_period,
         **kwargs,
     }

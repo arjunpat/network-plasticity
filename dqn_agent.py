@@ -37,6 +37,7 @@ class DQNAgent(nn.Module):
         self.use_double_q = use_double_q
 
         self.critic_loss = nn.MSELoss()
+        self.critic_weight_history = []
 
         self.update_target_critic()
 
@@ -145,6 +146,20 @@ class DQNAgent(nn.Module):
         new_critic = config["agent_kwargs"]["make_critic"](
             self.observation_shape, self.num_actions
         )
+
+        if config["swap_critic_averaging"] and len(self.critic_weight_history) > 0:
+            weights = config["get_swap_critic_avg_weights"](len(self.critic_weight_history))
+            assert np.allclose(weights.sum(), 1.0), weights.sum()
+
+            final_state_dict = {}
+            for key in self.critic_weight_history[0]:
+                final_state_dict[key] = sum([
+                    weights[i] * self.critic_weight_history[i][key]
+                    for i in range(len(self.critic_weight_history))
+                ])
+
+            new_critic.load_state_dict(final_state_dict) 
+            
         new_optim = config["agent_kwargs"]["make_optimizer"](new_critic.parameters())
         new_lr = config["agent_kwargs"]["make_lr_schedule"](new_optim)
 
@@ -175,6 +190,14 @@ class DQNAgent(nn.Module):
         self.critic_optimizer = new_optim
         self.lr_scheduler = new_lr
         self.update_target_critic()
+
+
+    def save_critic_weights(self):
+        if self.critic_weight_history is None:
+            self.critic_weight_history = []
+        
+        # append weights to history and freeze them
+        self.critic_weight_history.append(self.critic.state_dict())
 
     def update(
         self,

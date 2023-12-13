@@ -29,6 +29,10 @@ def basic_dqn_config(
     swap_critic: bool = False,
     swap_critic_period: int = 30000,
     swap_critic_init_epochs: int = 3,
+
+    # For the critic averaging experiment
+    swap_critic_averaging: bool = False,
+    swap_critic_averaging_period: int = 10000,
     **kwargs,
 ):
     def make_critic(observation_shape: Tuple[int, ...], num_actions: int) -> nn.Module:
@@ -63,6 +67,9 @@ def basic_dqn_config(
             gym.make(env_name, render_mode="rgb_array" if render else None)
         )
 
+    def get_swap_critic_avg_weights(n: int):
+        return np.ones(n) / n
+
     log_string = f"{exp_name}_{env_name}_" + time.strftime("%d-%m-%Y_%H-%M-%S")
 
     return {
@@ -78,6 +85,7 @@ def basic_dqn_config(
         "exploration_schedule": exploration_schedule,
         "log_name": log_string,
         "make_env": make_env,
+        "get_swap_critic_avg_weights": get_swap_critic_avg_weights,
         "total_steps": total_steps,
         "batch_size": batch_size,
         "learning_starts": learning_starts,
@@ -85,5 +93,7 @@ def basic_dqn_config(
         "swap_critic": swap_critic,
         "swap_critic_period": swap_critic_period,
         "swap_critic_init_epochs": swap_critic_init_epochs,
+        "swap_critic_averaging": swap_critic_averaging,
+        "swap_critic_averaging_period": swap_critic_averaging_period,
         **kwargs,
     }

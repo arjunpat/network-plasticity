@@ -116,6 +116,11 @@ def run_training(config: dict, logger: Logger, data_path: str):
 
         # Main DQN training loop
         if step >= config["learning_starts"]:
+            if config["swap_critic_averaging"] and step % config["swap_critic_averaging_period"] == 0:
+                print("saving critic weights")
+                # save current critic weights
+                agent.save_critic_weights()
+
             if config["swap_critic"] and step % config["swap_critic_period"] == 0:
                 print("Begin swap critic")
                 old_time = time.time()
@@ -238,10 +243,14 @@ if __name__ == "__main__":
     """
     config = basic_dqn_config(
         "CartPole-v0",
-        exp_name="cartpole_swap_critic_epochs_next_obs",
+        exp_name="cartpole_rql",
         swap_critic=True,
         swap_critic_period=100000,
         swap_critic_init_epochs=5,
+        swap_critic_averaging=True,
+        swap_critic_averaging_period=10000,
+        # swap_critic_period=2,
+        # swap_critic_averaging_period=1,
         # hidden_size=64,
         # num_layers=2,
         # learning_rate=1e-3,
@@ -256,15 +265,17 @@ if __name__ == "__main__":
     """
     config = atari_dqn_config(
         "BreakoutNoFrameskip-v4",
-        exp_name="breakout_swap_critic",
-        swap_critic=True,
-        swap_critic_period=350000,
-        swap_critic_init_epochs=5,
+        exp_name="breakout_normal_but_actually__5_epoch_high_eps",
+        # swap_critic=True,
+        # swap_critic_period=515000,
+        # swap_critic_init_epochs=5,
+        # swap_critic_averaging=True,
+        # swap_critic_averaging_period=50000,
         # use_double_q=False,
-        # weight_decay=False
+        # weight_decay=True,
         # hidden_size=64,
         # num_layers=2,
-        # learning_rate=1.0e-4,
+        # learning_rate=1.0e-4,fi
         # total_steps=300000 * 2,
         # discount=0.99,
         # target_update_period=1000,
@@ -273,22 +284,6 @@ if __name__ == "__main__":
         # batch_size=128,
     )
 
-    data_path = get_logdir(config, final=args.final)
-
-    if os.path.exists(data_path):
-        raise Exception("Log directory already exists!")
-    else:
-        os.makedirs(data_path)
-
-    # save config to log directory
-    with open(os.path.join(data_path, "config.json"), "w") as f:
-        json.dump(
-            config, f, skipkeys=True, indent=4, sort_keys=True, default=lambda e: str(e)
-        )
-
-    logger = Logger(os.path.join(data_path, "tensorboard"))
-
-    run_training(config, logger, data_path)
     data_path = get_logdir(config, final=args.final)
 
     if os.path.exists(data_path):
