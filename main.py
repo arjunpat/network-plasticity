@@ -242,6 +242,7 @@ if __name__ == "__main__":
         "BreakoutNoFrameskip-v4",
         exp_name="breakout",
         use_double_q=True,
+        weight_decay=True
         # hidden_size=64,
         # num_layers=2,
         # learning_rate=1.0e-4,

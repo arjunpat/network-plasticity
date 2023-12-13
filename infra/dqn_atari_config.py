@@ -34,6 +34,7 @@ def atari_dqn_config(
     use_double_q: bool = False,
     learning_starts: int = 20000,
     batch_size: int = 32,
+    weight_decay: bool = False,
     **kwargs,
 ):
     def make_critic(observation_shape: Tuple[int, ...], num_actions: int) -> nn.Module:
@@ -58,7 +59,12 @@ def atari_dqn_config(
         ).to(ptu.device)
 
     def make_optimizer(params: torch.nn.ParameterList) -> torch.optim.Optimizer:
-        return torch.optim.Adam(params, lr=learning_rate, eps=adam_eps)
+        if weight_decay:
+            return torch.optim.AdamW(
+                params, lr=learning_rate, eps=adam_eps, weight_decay=1e-4
+            )
+        else:
+            return torch.optim.Adam(params, lr=learning_rate, eps=adam_eps)
 
     def make_lr_schedule(
         optimizer: torch.optim.Optimizer,
@@ -110,5 +116,6 @@ def atari_dqn_config(
         "total_steps": total_steps,
         "batch_size": batch_size,
         "learning_starts": learning_starts,
+        "weight_decay": weight_decay,
         **kwargs,
     }
