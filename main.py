@@ -117,6 +117,7 @@ def run_training(config: dict, logger: Logger, data_path: str):
         # Main DQN training loop
         if step >= config["learning_starts"]:
             if config["swap_critic"] and step % config["swap_critic_period"] == 0:
+                print("Begin swap critic")
                 old_time = time.time()
                 agent.swap_critic(
                     config,
@@ -234,6 +235,7 @@ if __name__ == "__main__":
     torch.manual_seed(RANDOM_SEED)
     ptu.init_gpu(use_gpu=USE_GPU, gpu_id=GPU_ID)
 
+    """
     config = basic_dqn_config(
         "CartPole-v0",
         exp_name="cartpole_swap_critic_epochs_next_obs",
@@ -251,12 +253,15 @@ if __name__ == "__main__":
         # learning_starts=20000,
         # batch_size=128,
     )
-    """"
+    """
     config = atari_dqn_config(
         "BreakoutNoFrameskip-v4",
-        exp_name="breakout",
-        use_double_q=True,
-        weight_decay=True
+        exp_name="breakout_swap_critic",
+        swap_critic=True,
+        swap_critic_period=350000,
+        swap_critic_init_epochs=5,
+        # use_double_q=False,
+        # weight_decay=False
         # hidden_size=64,
         # num_layers=2,
         # learning_rate=1.0e-4,
@@ -267,8 +272,23 @@ if __name__ == "__main__":
         # learning_starts=20000,
         # batch_size=128,
     )
-    """
 
+    data_path = get_logdir(config, final=args.final)
+
+    if os.path.exists(data_path):
+        raise Exception("Log directory already exists!")
+    else:
+        os.makedirs(data_path)
+
+    # save config to log directory
+    with open(os.path.join(data_path, "config.json"), "w") as f:
+        json.dump(
+            config, f, skipkeys=True, indent=4, sort_keys=True, default=lambda e: str(e)
+        )
+
+    logger = Logger(os.path.join(data_path, "tensorboard"))
+
+    run_training(config, logger, data_path)
     data_path = get_logdir(config, final=args.final)
 
     if os.path.exists(data_path):
