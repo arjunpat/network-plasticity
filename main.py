@@ -240,15 +240,15 @@ if __name__ == "__main__":
     torch.manual_seed(RANDOM_SEED)
     ptu.init_gpu(use_gpu=USE_GPU, gpu_id=GPU_ID)
 
-    """
-    config = basic_dqn_config(
-        "CartPole-v0",
-        exp_name="cartpole_rql",
-        swap_critic=True,
-        swap_critic_period=100000,
-        swap_critic_init_epochs=5,
-        swap_critic_averaging=True,
-        swap_critic_averaging_period=10000,
+    # config = basic_dqn_config(
+        # "CartPole-v0",
+        # exp_name="cartpole_l2",
+        # weight_decay=True,
+        # swap_critic=True,
+        # swap_critic_period=100000,
+        # swap_critic_init_epochs=5,
+        # swap_critic_averaging=True,
+        # swap_critic_averaging_period=10000,
         # swap_critic_period=2,
         # swap_critic_averaging_period=1,
         # hidden_size=64,
@@ -261,16 +261,16 @@ if __name__ == "__main__":
         # use_double_q=False,
         # learning_starts=20000,
         # batch_size=128,
-    )
-    """
+    # )
+
     config = atari_dqn_config(
         "BreakoutNoFrameskip-v4",
-        exp_name="breakout_normal_but_actually__5_epoch_high_eps",
-        # swap_critic=True,
-        # swap_critic_period=515000,
-        # swap_critic_init_epochs=5,
-        # swap_critic_averaging=True,
-        # swap_critic_averaging_period=50000,
+        exp_name="breakout_rql_fixed",
+        swap_critic=True,
+        swap_critic_period=515000,
+        swap_critic_init_epochs=5,
+        swap_critic_averaging=True,
+        swap_critic_averaging_period=50000,
         # use_double_q=False,
         # weight_decay=True,
         # hidden_size=64,

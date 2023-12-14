@@ -5,6 +5,7 @@ import torch
 from torch import nn
 
 from infra import pytorch_util as ptu
+from copy import deepcopy
 
 
 class DQNAgent(nn.Module):
@@ -197,7 +198,7 @@ class DQNAgent(nn.Module):
             self.critic_weight_history = []
         
         # append weights to history and freeze them
-        self.critic_weight_history.append(self.critic.state_dict())
+        self.critic_weight_history.append(deepcopy(self.critic.state_dict()))
 
     def update(
         self,
